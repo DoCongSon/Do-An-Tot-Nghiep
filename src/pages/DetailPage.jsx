@@ -8,7 +8,7 @@ const DetailPage = () => {
       <div className='basis-1/3'>
         <div>
           <img
-            className='w-60 h-80 border-solid border-gray-900 border-4 rounded-xl mx-auto'
+            className='w-60 h-80 border-solid border-gray-900 border-4 rounded-xl mx-auto shadow-md shadow-black'
             src='https://i.pinimg.com/750x/41/0b/a0/410ba00d86532bd9f7baa72ab6fa1dd9.jpg'
             alt=''
           />

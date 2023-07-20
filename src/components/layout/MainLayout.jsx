@@ -5,9 +5,7 @@ const MainLayout = () => {
   return (
     <div className='bg-slate-200 min-h-screen'>
       <Header />
-      <div className=''>
-        <Outlet />
-      </div>
+      <Outlet />
     </div>
   );
 };
