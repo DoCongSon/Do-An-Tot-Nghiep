@@ -3,48 +3,57 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import PageWrapper from './components/common/PageWrapper';
-import routes from './routes/routes';
+import { routesAdmin, routesUser } from './routes/routes';
 import ErrorPage from './pages/ErrorPage';
 import AuthPage from './pages/AuthPage';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUser } from './apis/user.api';
+import { clearUser, setAdmin, setUser } from './redux/features/userSlice';
+import LoadingOverlay from './components/common/LoadingOverlay';
+import { setGlobalLoading } from './redux/features/globalLoadingSlice';
+import HomePage from './pages/HomePage';
 
 function App() {
   const [isUser, setIsUser] = useState(false);
-  const navigate = useNavigate();
+  const admin = useSelector((state) => state.user.admin);
+  const globalLoading = useSelector((state) => state.globalLoading.globalLoading);
+  const dispatch = useDispatch();
   const auth = getAuth();
 
   useEffect(() => {
+    dispatch(setGlobalLoading(true));
     onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsUser(true);
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/auth.user
         const uid = user.uid;
-        console.log('🚀 ~ file: App.jsx:21 ~ uid:', uid);
-        // ...
+        getUser(uid).then((data) => {
+          if (data?.admin) {
+            dispatch(setAdmin(true));
+            dispatch(clearUser());
+          } else {
+            dispatch(setAdmin(false));
+            dispatch(setUser({ ...data, userId: uid }));
+          }
+          dispatch(setGlobalLoading(false));
+        });
       } else {
         setIsUser(false);
-        console.log('no user');
-        // User is signed out
-        // ...
+        dispatch(setGlobalLoading(false));
       }
     });
-  }, [auth]);
+  }, [auth, dispatch]);
 
-  useEffect(() => {
-    if (isUser) {
-      navigate('/');
-    } else {
-      navigate('/auth');
-    }
-  }, [isUser]);
+  if (globalLoading) return <LoadingOverlay />;
 
   if (!isUser)
     return (
       <Routes>
-        <Route path='/auth' element={<AuthPage />} />
+        <Route path='/' element={<AuthPage />} />
+        <Route path='*' element={<ErrorPage />} />
       </Routes>
     );
 
+  const routes = admin ? routesAdmin : routesUser;
   return (
     <Routes>
       <Route path='/' element={<MainLayout />}>

@@ -5,10 +5,10 @@ import ManagePage from '../pages/ManagePage';
 
 export const routesGen = {
   home: '/',
-  person: (id) => `/person/${id}`,
+  person: '/person',
 };
 
-const routes = [
+const routesAdmin = [
   {
     index: true,
     element: <HomePage />,
@@ -25,10 +25,18 @@ const routes = [
     state: 'Manage',
   },
   {
-    path: '/person/:personId',
+    path: '/person',
     element: <DetailPage />,
-    state: 'person.personId',
+    state: 'person',
   },
 ];
 
-export default routes;
+const routesUser = [
+  {
+    index: true,
+    element: <DetailPage />,
+    state: 'Home',
+  },
+];
+
+export { routesAdmin, routesUser };

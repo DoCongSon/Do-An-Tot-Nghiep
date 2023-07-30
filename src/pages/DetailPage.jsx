@@ -1,122 +1,113 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import Modal from '../components/common/Modal';
+import QRCode from 'qrcode';
+import html2canvas from 'html2canvas';
 
 const DetailPage = () => {
-  console.log(location);
+  const [modalVisible, setModalVisible] = useState(false);
+  const user = useSelector((state) => state.user);
+  const cardRef = useRef(null);
+  const [qr, setQr] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      if (user) {
+        const userId = user.userId;
+        const QRUrl = await QRCode.toDataURL(userId);
+        setQr(QRUrl);
+      }
+    })();
+  }, [user]);
+
+  const handleDownloadCard = async () => {
+    const element = cardRef.current;
+    const canvas = await html2canvas(element, {});
+    const data = canvas.toDataURL('image/jpg');
+    const link = document.createElement('a');
+
+    link.href = data;
+    link.download = `Thẻ khám bệnh_${user.name}.jpg`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
-    <div className='flex flex-row p-5'>
+    <div className='flex flex-col gap-5 md:gap-0 md:flex-row p-5'>
       {/* person information */}
-      <div className='basis-1/3'>
-        <div>
+      <div className='p-0 md:pr-2 md:basis-1/3 lg:basis-1/4 border-b-2 border-gray-600 pb-5 md:border-none md:pb-0'>
+        <div onClick={() => setModalVisible(true)}>
           <img
-            className='w-60 h-80 border-solid border-gray-900 border-4 rounded-xl mx-auto shadow-md shadow-black'
-            src='https://i.pinimg.com/750x/41/0b/a0/410ba00d86532bd9f7baa72ab6fa1dd9.jpg'
+            className='cursor-pointer hover:border-red-600 hover:shadow-red-600 bg-white object-contain max-w-[320px] w-full h-auto border-solid border-gray-900 border-4 rounded-xl mx-auto shadow-md shadow-black'
+            src={user.QRCodeUrl}
             alt=''
           />
         </div>
         <div>
-          <p className='text-center text-3xl font-sans font-medium mt-2'>Đỗ Công Sơn - BN1234</p>
+          <p className='text-center text-3xl font-sans font-medium mt-5'>{user.name}</p>
           <p className='text-xl font-sans font-medium mt-5'>
-            <span className='text-red-600 font-bold'>Tuổi: </span>21
+            <span className='text-red-600 font-bold'>Tuổi: </span>
+            {user.age}
           </p>
           <p className='text-xl font-sans font-medium mt-2'>
-            <span className='text-red-600 font-bold'>Giới tính: </span>Nam
+            <span className='text-red-600 font-bold'>Giới tính: </span>
+            {user.sex == 'male' ? 'Nam' : 'Nữ'}
           </p>
           <p className='text-xl font-sans font-medium mt-2'>
-            <span className='text-red-600 font-bold'>Ngày sinh: </span>01/10/2001
+            <span className='text-red-600 font-bold'>Ngày sinh: </span>
+            {user.dateOfBirth}
           </p>
           <p className='text-xl font-sans font-medium mt-2'>
-            <span className='text-red-600 font-bold'>Địa chỉ: </span>Hoàng Văn Thụ, Chương Mỹ, Hà
-            Nội
+            <span className='text-red-600 font-bold'>Địa chỉ: </span>
+            {user.address}
           </p>
           <p className='text-xl font-sans font-medium mt-2'>
-            <span className='text-red-600 font-bold'>Số điện thoại: </span>0123456789
+            <span className='text-red-600 font-bold'>Số điện thoại: </span>
+            {user.phoneNumber}
           </p>
         </div>
       </div>
       {/* person information */}
 
       {/* patient information */}
-      <div className='basis-2/3'>
+      <div className='md:basis-2/3 lg:basis-3/4'>
         <p className='text-center text-3xl font-sans font-medium'>Lịch sử khám bệnh</p>
-        <div className='mt-10 overflow-y-auto max-h-[600px]'>
-          <div className='mb-10'>
-            <p className='text-xl font-sans font-medium mt-2'>
-              <span className='text-red-600 font-bold'>Lần khám: </span>1
-            </p>
-            <p className='text-xl font-sans font-medium mt-2'>
-              <span className='text-red-600 font-bold'>Ngày khám: </span>01/10/2023
-              <span className='text-red-600 font-bold ml-10 inline-block'>Giờ khám:</span> 09:00 -
-              17:00
-            </p>
-            <p className='text-xl font-sans font-medium mt-2'>
-              <span className='text-red-600 font-bold'>Chuẩn đoán: </span>Đau đầu
-            </p>
-            <div className='p-5 bg-white border-2 border-green-500 rounded-lg mt-2'>
-              <p className='text-xl font-sans font-medium'>
-                <span className='text-red-600 font-bold'>Đơn thuốc & cách điều trị: </span>
+      </div>
+      {/* patient information */}
+
+      {/* modal */}
+      <Modal isVisible={modalVisible} onClose={() => setModalVisible(false)}>
+        <h3 className='text-xl font-semibold text-gray-900 mb-4'>Thẻ khám bệnh</h3>
+        <div
+          ref={cardRef}
+          className='overflow-hidden bg-blue-50 border-solid border-blue-800 border-4 mx-auto shadow-md shadow-blue-800 p-5'>
+          <p className='text-3xl font-bold text-blue-900 pb-8 text-center'>Thẻ khám bệnh</p>
+          <div className='flex'>
+            <img
+              className='object-contain w-40 h-40 border-blue-800 border-2 rounded-xl'
+              src={qr}
+            />
+            <div className='ml-5'>
+              <p className='text-lg font-semibold text-gray-900 mb-2'>Tên: {user.name}</p>
+              <p className='text-lg font-semibold text-gray-900 mb-2'>Tuổi: {user.age}</p>
+              <p className='text-lg font-semibold text-gray-900 mb-2'>
+                Giới tính: {user.sex === 'male' ? 'Nam' : 'Nữ'}
               </p>
-              <p className='text-xl font-sans font-medium mt-2 leading-8'>
-                Nghỉ ngơi trong một căn phòng tối, yên tĩnh. Chườm nóng hoặc lạnh lên thái dương
-                hoặc trán. Uống nhiều nước. Tập thể dục thường xuyên. Giảm căng thẳng. Nếu cơn đau
-                đầu dữ dội hoặc không đáp ứng với các biện pháp điều trị không dùng thuốc, bạn có
-                thể dùng thuốc giảm đau không kê đơn như acetaminophen (Tylenol), ibuprofen (Advil,
-                Motrin) hoặc naproxen (Aleve).
-              </p>
-            </div>
-          </div>
-          <div className='mb-10'>
-            <p className='text-xl font-sans font-medium mt-2'>
-              <span className='text-red-600 font-bold'>Lần khám: </span>1
-            </p>
-            <p className='text-xl font-sans font-medium mt-2'>
-              <span className='text-red-600 font-bold'>Ngày khám: </span>01/10/2023
-              <span className='text-red-600 font-bold ml-10 inline-block'>Giờ khám:</span> 09:00 -
-              17:00
-            </p>
-            <p className='text-xl font-sans font-medium mt-2'>
-              <span className='text-red-600 font-bold'>Chuẩn đoán: </span>Đau đầu
-            </p>
-            <div className='p-5 bg-white border-2 border-green-500 rounded-lg mt-2'>
-              <p className='text-xl font-sans font-medium'>
-                <span className='text-red-600 font-bold'>Đơn thuốc & cách điều trị: </span>
-              </p>
-              <p className='text-xl font-sans font-medium mt-2 leading-8'>
-                Nghỉ ngơi trong một căn phòng tối, yên tĩnh. Chườm nóng hoặc lạnh lên thái dương
-                hoặc trán. Uống nhiều nước. Tập thể dục thường xuyên. Giảm căng thẳng. Nếu cơn đau
-                đầu dữ dội hoặc không đáp ứng với các biện pháp điều trị không dùng thuốc, bạn có
-                thể dùng thuốc giảm đau không kê đơn như acetaminophen (Tylenol), ibuprofen (Advil,
-                Motrin) hoặc naproxen (Aleve).
-              </p>
-            </div>
-          </div>
-          <div className='mb-10'>
-            <p className='text-xl font-sans font-medium mt-2'>
-              <span className='text-red-600 font-bold'>Lần khám: </span>1
-            </p>
-            <p className='text-xl font-sans font-medium mt-2'>
-              <span className='text-red-600 font-bold'>Ngày khám: </span>01/10/2023
-              <span className='text-red-600 font-bold ml-10 inline-block'>Giờ khám:</span> 09:00 -
-              17:00
-            </p>
-            <p className='text-xl font-sans font-medium mt-2'>
-              <span className='text-red-600 font-bold'>Chuẩn đoán: </span>Đau đầu
-            </p>
-            <div className='p-5 bg-white border-2 border-green-500 rounded-lg mt-2'>
-              <p className='text-xl font-sans font-medium'>
-                <span className='text-red-600 font-bold'>Đơn thuốc & cách điều trị: </span>
-              </p>
-              <p className='text-xl font-sans font-medium mt-2 leading-8'>
-                Nghỉ ngơi trong một căn phòng tối, yên tĩnh. Chườm nóng hoặc lạnh lên thái dương
-                hoặc trán. Uống nhiều nước. Tập thể dục thường xuyên. Giảm căng thẳng. Nếu cơn đau
-                đầu dữ dội hoặc không đáp ứng với các biện pháp điều trị không dùng thuốc, bạn có
-                thể dùng thuốc giảm đau không kê đơn như acetaminophen (Tylenol), ibuprofen (Advil,
-                Motrin) hoặc naproxen (Aleve).
-              </p>
+              <p className='text-lg font-semibold text-gray-900'>Địa chỉ: {user.address}</p>
             </div>
           </div>
         </div>
-      </div>
-      {/* patient information */}
+        <div className='flex justify-end mt-5'>
+          <button
+            onClick={handleDownloadCard}
+            className='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center'>
+            Tải về
+          </button>
+        </div>
+      </Modal>
+      {/* modal */}
     </div>
   );
 };

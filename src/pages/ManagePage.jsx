@@ -1,36 +1,64 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
-import { addUser, updateUser } from '../apis/user.api';
+import { addUser } from '../apis/user.api';
 import { uploadDataURL } from '../apis/storage.api';
+import { deleteApp, initializeApp } from 'firebase/app';
+import { firebaseConfig } from '../../config';
+import { createUserWithEmailAndPassword, getAuth, signOut } from 'firebase/auth';
 
 const ManagePage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [age, setAge] = useState('');
+  const [age, setAge] = useState(0);
   const [address, setAddress] = useState('');
   const [sex, setSex] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
 
+  useEffect(() => {
+    if (dateOfBirth) {
+      const today = new Date();
+      const birthDate = new Date(dateOfBirth);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const month = today.getMonth() - birthDate.getMonth();
+      if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      setAge(age);
+    }
+  }, [dateOfBirth]);
+
   const handleAddUser = async (e) => {
     e.preventDefault();
-    await addUser({
-      name,
-      age,
-      sex,
-      address,
-      phoneNumber,
-      dateOfBirth,
-      QRCodeUrl: '',
-      userId: '1234',
-    });
-    // const QRUrl = await QRCode.toDataURL(docRef.id);
-    // const QRCodeUrl = await uploadDataURL({ data: QRUrl, path: `/${docRef.id}/QRcode` });
-    // await updateUser({ userId: docRef.id, data: { QRCodeUrl } });
+    const tempApp = initializeApp(firebaseConfig, 'tempApp');
+    const tempAppAuth = getAuth(tempApp);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(tempAppAuth, email, password);
+      const user = userCredential.user;
+      const userId = user.uid;
+      const QRUrl = await QRCode.toDataURL(userId);
+      const QRCodeUrl = await uploadDataURL({ data: QRUrl, path: `/${userId}/QRcode` });
+      await addUser({
+        name,
+        age,
+        sex,
+        address,
+        phoneNumber,
+        dateOfBirth,
+        QRCodeUrl,
+        userId,
+      });
+    } catch (error) {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log("can't create", { errorCode, errorMessage });
+    }
+    await signOut(tempAppAuth);
+    await deleteApp(tempApp);
     setIsModalVisible(false);
   };
 
@@ -132,25 +160,6 @@ const ManagePage = () => {
             </label>
           </div>
           <div className='grid md:grid-cols-2 md:gap-6'>
-            <div className='relative z-0 w-full mb-6 group'>
-              <input
-                value={age}
-                onChange={(e) => setAge(e.target.value)}
-                type='number'
-                min={0}
-                max={150}
-                name='floating_age'
-                id='floating_age'
-                className='block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer'
-                placeholder=' '
-                required
-              />
-              <label
-                htmlFor='floating_age'
-                className='peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6'>
-                Tuổi
-              </label>
-            </div>
             <div className='flex gap-6 mb-6 items-center'>
               <p className='text-sm text-gray-500'>Giới tính:</p>
               <div className='flex items-center'>
@@ -163,7 +172,7 @@ const ManagePage = () => {
                   value='male'
                   className='border-gray-300'
                 />
-                <label htmlFor='male' className='block ml-2 text-sm font-medium text-gray-900'>
+                <label htmlFor='male' className='block ml-2 text-sm font-medium text-gray-500'>
                   Nam
                 </label>
               </div>
@@ -177,7 +186,7 @@ const ManagePage = () => {
                   value='female'
                   className='border-gray-300'
                 />
-                <label htmlFor='female' className='block ml-2 text-sm font-medium text-gray-900'>
+                <label htmlFor='female' className='block ml-2 text-sm font-medium text-gray-500'>
                   Nữ
                 </label>
               </div>

@@ -20,7 +20,7 @@ const signup = async ({ email, password }) => {
 
 const signin = async ({ email, password }) => {
   try {
-    const userCredential = signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     return user;
   } catch (error) {

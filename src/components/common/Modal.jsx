@@ -4,8 +4,8 @@ const Modal = ({ children, isVisible, onClose }) => {
   if (!isVisible) return null;
 
   return (
-    <div className='backdrop-blur-lg flex items-center justify-center fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full'>
-      <div className='relative w-full max-w-3xl max-h-full'>
+    <div className='bg-black/50 backdrop-blur-lg flex items-center justify-center fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full'>
+      <div className='relative min-w-[576px] max-w-3xl max-h-full'>
         <div className='relative bg-white rounded-lg shadow'>
           <button
             onClick={onClose}

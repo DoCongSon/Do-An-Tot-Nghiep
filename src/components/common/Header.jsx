@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
 import { signout } from '../../apis/auth.api';
+import { setGlobalLoading } from '../../redux/features/globalLoadingSlice';
 
 const navitems = [
   {
@@ -69,9 +70,15 @@ const navitems = [
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { appState } = useSelector((state) => state.appState);
+  const admin = useSelector((state) => state.user.admin);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
+    dispatch(setGlobalLoading(true));
     await signout();
+    navigate('/');
+    dispatch(setGlobalLoading(false));
   };
 
   return (
@@ -81,10 +88,10 @@ const Header = () => {
           <Link to='/' className='flex items-center select-none'>
             <img
               src='https://flowbite.com/docs/images/logo.svg'
-              className='mr-3 h-6 sm:h-9'
+              className='mr-3 h-9'
               alt='Flowbite Logo'
             />
-            <span className='font-extrabold text-transparent text-2xl bg-clip-text bg-gradient-to-r from-indigo-500 from-10% via-sky-500 via-30% to-emerald-500 to-90%'>
+            <span className='hidden sm:block font-extrabold text-transparent text-2xl bg-clip-text bg-gradient-to-r from-indigo-500 from-10% via-sky-500 via-30% to-emerald-500 to-90%'>
               Patient management
             </span>
           </Link>
@@ -134,23 +141,24 @@ const Header = () => {
             }
             id='mobile-menu-2'>
             <ul className='flex flex-col mt-4 font-medium md:flex-row md:space-x-8 md:mt-0'>
-              {navitems.map((item, index) => {
-                return (
-                  <li key={index} className='flex items-center'>
-                    <Link
-                      to={item.to}
-                      className={
-                        appState === item.name
-                          ? 'select-none bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text flex justify-center items-center gap-2 rounded bg-primary-700 md:bg-transparent md:text-primary-700 md:p-0 text-sm font-semibold hover:text-teal-500 px-4 lg:px-5 py-2 lg:py-2.5'
-                          : 'select-none text-sky-400 rounded bg-primary-700 md:bg-transparent md:text-primary-700 md:p-0 text-sm font-semibold hover:text-teal-500 flex justify-center items-center gap-2 px-4 lg:px-5 py-2 lg:py-2.5'
-                      }
-                      aria-current='page'>
-                      {item.icon}
-                      {item.name}
-                    </Link>
-                  </li>
-                );
-              })}
+              {admin &&
+                navitems.map((item, index) => {
+                  return (
+                    <li key={index} className='flex items-center'>
+                      <Link
+                        to={item.to}
+                        className={
+                          appState === item.name
+                            ? 'select-none bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text flex justify-center items-center gap-2 rounded bg-primary-700 md:bg-transparent md:text-primary-700 md:p-0 text-sm font-semibold hover:text-teal-500 px-4 lg:px-5 py-2 lg:py-2.5'
+                            : 'select-none text-sky-400 rounded bg-primary-700 md:bg-transparent md:text-primary-700 md:p-0 text-sm font-semibold hover:text-teal-500 flex justify-center items-center gap-2 px-4 lg:px-5 py-2 lg:py-2.5'
+                        }
+                        aria-current='page'>
+                        {item.icon}
+                        {item.name}
+                      </Link>
+                    </li>
+                  );
+                })}
             </ul>
           </div>
         </div>

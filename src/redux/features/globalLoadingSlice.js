@@ -1,13 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 export const globalLoadingSlide = createSlice({
-  name: 'GlobalLoading',
+  name: 'globalLoading',
   initialState: {
     globalLoading: false,
   },
   reducers: {
     setGlobalLoading: (state, action) => {
-      state.appState = action.payload;
+      state.globalLoading = action.payload;
     },
   },
 });

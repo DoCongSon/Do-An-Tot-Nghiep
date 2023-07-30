@@ -1,46 +1,81 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { uploadDataURL } from '../apis/storage.api';
 import { addUser } from '../apis/user.api';
 import { signin, signup } from '../apis/auth.api';
+import { useDispatch } from 'react-redux';
+import { setGlobalLoading } from '../redux/features/globalLoadingSlice';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const AuthPage = () => {
   const [isSignin, setIsSignin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [age, setAge] = useState('');
+  const [age, setAge] = useState(0);
   const [address, setAddress] = useState('');
   const [sex, setSex] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (dateOfBirth) {
+      const today = new Date();
+      const birthDate = new Date(dateOfBirth);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const month = today.getMonth() - birthDate.getMonth();
+      if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      setAge(age);
+    }
+  }, [dateOfBirth]);
 
   const handelSignup = async (e) => {
     e.preventDefault();
-    const user = await signup({ email, password });
-    const userId = user.uid;
-    const QRUrl = await QRCode.toDataURL(userId);
-    const QRCodeUrl = await uploadDataURL({ data: QRUrl, path: `/${userId}/QRcode` });
-    await addUser({
-      name,
-      age,
-      sex,
-      address,
-      phoneNumber,
-      dateOfBirth,
-      QRCodeUrl,
-      userId,
-    });
+    dispatch(setGlobalLoading(true));
+    try {
+      const user = await signup({ email, password });
+      const userId = user.uid;
+      const QRUrl = await QRCode.toDataURL(userId);
+      const QRCodeUrl = await uploadDataURL({ data: QRUrl, path: `/${userId}/QRcode` });
+      await addUser({
+        name,
+        age,
+        sex,
+        address,
+        phoneNumber,
+        dateOfBirth,
+        QRCodeUrl,
+        userId,
+      });
+      navigate('/');
+      toast.success('Đăng nhập thành công!');
+    } catch (error) {
+      toast.error('Đã sảy ra lỗi gì đó, hãy thử lại!');
+    }
+    dispatch(setGlobalLoading(false));
   };
 
   const handelSignin = async (e) => {
+    dispatch(setGlobalLoading(true));
     e.preventDefault();
-    await signin({ email, password });
+    const user = await signin({ email, password });
+    dispatch(setGlobalLoading(false));
+    if (user) {
+      navigate('/');
+      toast.success('Đăng nhập thành công!');
+    } else {
+      toast.error('Đã sảy ra lỗi gì đó, hãy thử lại!');
+    }
   };
 
   if (isSignin)
     return (
-      <div className='bg-slate-200 flex items-center justify-center fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full'>
+      <div className='bg-black/50 backdrop-blur-lg flex items-center justify-center fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full'>
         <div className='relative w-full max-w-xl max-h-full'>
           <div className='relative bg-white rounded-lg shadow'>
             <div className='px-6 py-6 lg:px-8'>
@@ -105,7 +140,7 @@ const AuthPage = () => {
     );
 
   return (
-    <div className='bg-slate-200 flex items-center justify-center fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full'>
+    <div className='bg-black/50 backdrop-blur-lg flex items-center justify-center fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full'>
       <div className='relative w-full max-w-3xl max-h-full'>
         <div className='relative bg-white rounded-lg shadow'>
           <div className='px-6 py-6 lg:px-8'>
@@ -180,25 +215,6 @@ const AuthPage = () => {
                 </label>
               </div>
               <div className='grid md:grid-cols-2 md:gap-6'>
-                <div className='relative z-0 w-full mb-6 group'>
-                  <input
-                    value={age}
-                    onChange={(e) => setAge(e.target.value)}
-                    type='number'
-                    min={0}
-                    max={150}
-                    name='floating_age'
-                    id='floating_age'
-                    className='block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer'
-                    placeholder=' '
-                    required
-                  />
-                  <label
-                    htmlFor='floating_age'
-                    className='peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6'>
-                    Tuổi
-                  </label>
-                </div>
                 <div className='flex gap-6 mb-6 items-center'>
                   <p className='text-sm text-gray-500'>Giới tính:</p>
                   <div className='flex items-center'>
@@ -211,7 +227,7 @@ const AuthPage = () => {
                       value='male'
                       className='border-gray-300'
                     />
-                    <label htmlFor='male' className='block ml-2 text-sm font-medium text-gray-900'>
+                    <label htmlFor='male' className='block ml-2 text-sm font-medium text-gray-500'>
                       Nam
                     </label>
                   </div>
@@ -227,7 +243,7 @@ const AuthPage = () => {
                     />
                     <label
                       htmlFor='female'
-                      className='block ml-2 text-sm font-medium text-gray-900'>
+                      className='block ml-2 text-sm font-medium text-gray-500'>
                       Nữ
                     </label>
                   </div>
