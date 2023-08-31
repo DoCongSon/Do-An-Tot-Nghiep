@@ -7,8 +7,12 @@ import { uploadDataURL } from '../apis/storage.api';
 import { deleteApp, initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../../config';
 import { createUserWithEmailAndPassword, getAuth, signOut } from 'firebase/auth';
+import UserItem from '../components/common/UserItem';
+import { collection, onSnapshot, query } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const ManagePage = () => {
+  const [users, setUsers] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,6 +22,20 @@ const ManagePage = () => {
   const [sex, setSex] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+
+  useEffect(() => {
+    const q = query(collection(db, 'users'));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const users = [];
+      querySnapshot.forEach((doc) => {
+        if (doc.data().name) users.push({ ...doc.data(), userId: doc.id });
+      });
+      setUsers(users);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     if (dateOfBirth) {
@@ -63,7 +81,7 @@ const ManagePage = () => {
   };
 
   return (
-    <div className='p-5'>
+    <div className='p-5 flex flex-col gap-5'>
       <div className='flex flex-row justify-end'>
         <Button
           label='Thêm bệnh nhân'
@@ -87,6 +105,11 @@ const ManagePage = () => {
             setIsModalVisible(true);
           }}
         />
+      </div>
+      <div className='flex flex-1 flex-wrap gap-5 justify-center h-[1024px] overflow-hidden'>
+        {users.map((user) => (
+          <UserItem key={user.userId} {...user} />
+        ))}
       </div>
       <Modal isVisible={isModalVisible} onClose={() => setIsModalVisible(false)}>
         <h3 className='text-xl font-semibold text-gray-900 mb-4'>Thêm bệnh nhân mới</h3>

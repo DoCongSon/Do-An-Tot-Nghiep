@@ -1,10 +1,11 @@
 import {
-  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
+  deleteUser,
 } from 'firebase/auth';
 import { auth } from '../firebase.js';
+import { deleteUserData } from './user.api.js';
 
 const signup = async ({ email, password }) => {
   try {
@@ -38,4 +39,14 @@ const signout = async () => {
   }
 };
 
-export { signup, signin, signout };
+const deleteUserAccount = async () => {
+  try {
+    const user = auth.currentUser;
+    await deleteUser(user);
+    await deleteUserData();
+  } catch (error) {
+    console.log("Can't delete user" + error);
+  }
+};
+
+export { signup, signin, signout, deleteUserAccount };
