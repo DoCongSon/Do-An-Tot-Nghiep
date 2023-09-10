@@ -1,11 +1,6 @@
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  deleteUser,
-} from 'firebase/auth';
+import axios from 'axios';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from '../firebase.js';
-import { deleteUserData } from './user.api.js';
 
 const signup = async ({ email, password }) => {
   try {
@@ -39,13 +34,26 @@ const signout = async () => {
   }
 };
 
-const deleteUserAccount = async () => {
+const deleteUserAccount = async ({ authToken, uidToDelete }) => {
+  const cloudFunctionUrl =
+    'https://us-central1-do-an-tot-nghiep-dcs.cloudfunctions.net/deleteUserAccount';
   try {
-    const user = auth.currentUser;
-    await deleteUser(user);
-    await deleteUserData();
+    const headers = {
+      Authorization: `Bearer ${authToken}`,
+      AccessControl0AllowOrigin: '*',
+      AccessControlAllowMethods: 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+    };
+
+    const response = await axios.delete(cloudFunctionUrl, {
+      headers: headers,
+      data: {
+        uid: uidToDelete,
+      },
+    });
+
+    console.log('Response:', response.data);
   } catch (error) {
-    console.log("Can't delete user" + error);
+    console.error('Error:', error);
   }
 };
 

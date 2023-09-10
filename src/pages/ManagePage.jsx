@@ -9,7 +9,9 @@ import { firebaseConfig } from '../../config';
 import { createUserWithEmailAndPassword, getAuth, signOut } from 'firebase/auth';
 import UserItem from '../components/common/UserItem';
 import { collection, onSnapshot, query } from 'firebase/firestore';
-import { db } from '../firebase';
+import { auth, db } from '../firebase';
+import { deleteUserAccount } from '../apis/auth.api';
+import Dialog from '../components/common/Dialog';
 
 const ManagePage = () => {
   const [users, setUsers] = useState([]);
@@ -22,6 +24,9 @@ const ManagePage = () => {
   const [sex, setSex] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [isDialogShow, setIsDialogShow] = useState(false);
+  const [userNameToDelete, setUserNameDelete] = useState('');
+  const [uidToDelete, setUidToDelete] = useState('');
 
   useEffect(() => {
     const q = query(collection(db, 'users'));
@@ -80,6 +85,25 @@ const ManagePage = () => {
     setIsModalVisible(false);
   };
 
+  const handleEditUser = async () => {};
+
+  const handleDeleteUser = async (userId) => {
+    setUidToDelete(userId);
+    const user = users.find((user) => user.userId === userId);
+    setUserNameDelete(user.name);
+    setIsDialogShow(true);
+  };
+
+  const handleDialogSubmit = async () => {
+    const authToken = await auth.currentUser.getIdToken();
+    await deleteUserAccount({ authToken, uidToDelete });
+    setIsDialogShow(false);
+  };
+
+  const handleDialogCancel = () => {
+    setIsDialogShow(false);
+  };
+
   return (
     <div className='p-5 flex flex-col gap-5'>
       <div className='flex flex-row justify-end'>
@@ -108,7 +132,12 @@ const ManagePage = () => {
       </div>
       <div className='flex flex-1 flex-wrap gap-5 justify-center h-[1024px] overflow-hidden'>
         {users.map((user) => (
-          <UserItem key={user.userId} {...user} />
+          <UserItem
+            key={user.userId}
+            {...user}
+            onDelete={() => handleDeleteUser(user.userId)}
+            onEdit={() => handleEditUser(user.userId)}
+          />
         ))}
       </div>
       <Modal isVisible={isModalVisible} onClose={() => setIsModalVisible(false)}>
@@ -131,7 +160,7 @@ const ManagePage = () => {
               Email
             </label>
           </div>
-          <div class='relative z-0 w-full mb-6 group'>
+          <div className='relative z-0 w-full mb-6 group'>
             <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -260,6 +289,13 @@ const ManagePage = () => {
           </div>
         </form>
       </Modal>
+      <Dialog
+        onCancel={handleDialogCancel}
+        onSubmit={handleDialogSubmit}
+        onClose={handleDialogCancel}
+        isVisible={isDialogShow}
+        message={`Tài khoản "${userNameToDelete}" sẽ được xoá vĩnh viễn bao gồm cả dữ liệu khám bệnh, bạn có chắc chắn muốn xoá nó!`}
+      />
     </div>
   );
 };

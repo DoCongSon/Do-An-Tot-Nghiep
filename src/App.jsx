@@ -24,7 +24,6 @@ function App() {
     dispatch(setGlobalLoading(true));
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log(auth);
         setIsUser(true);
         const uid = user.uid;
         getUser(uid).then((data) => {
