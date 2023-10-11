@@ -34,7 +34,7 @@ const AuthPage = () => {
     }
   }, [dateOfBirth]);
 
-  const handelSignup = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     dispatch(setGlobalLoading(true));
     try {
@@ -60,7 +60,7 @@ const AuthPage = () => {
     dispatch(setGlobalLoading(false));
   };
 
-  const handelSignin = async (e) => {
+  const handleSignin = async (e) => {
     dispatch(setGlobalLoading(true));
     e.preventDefault();
     const user = await signin({ email, password });
@@ -73,6 +73,8 @@ const AuthPage = () => {
     }
   };
 
+  const handleForgotPassword = async () => {};
+
   if (isSignin)
     return (
       <div className='bg-black/50 backdrop-blur-lg flex items-center justify-center fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full'>
@@ -82,7 +84,7 @@ const AuthPage = () => {
               <h3 className='text-xl font-semibold text-gray-900 mb-4'>
                 Nhập email và mật khẩu để đăng nhập
               </h3>
-              <form onSubmit={handelSignin}>
+              <form onSubmit={handleSignin}>
                 <div className='relative z-0 w-full mb-6 group'>
                   <input
                     value={email}
@@ -117,6 +119,11 @@ const AuthPage = () => {
                     Mật khẩu
                   </label>
                 </div>
+                <p
+                  onClick={handleForgotPassword}
+                  className='text-sm py-2 cursor-pointer inline-block font-medium text-blue-600 hover:underline'>
+                  Quên mật khẩu ?
+                </p>
                 <div className='flex justify-center'>
                   <button
                     type='submit'
@@ -124,11 +131,11 @@ const AuthPage = () => {
                     Đăng Nhập
                   </button>
                 </div>
-                <p className='text-sm font-light text-gray-500 mt-8'>
+                <p className='text-sm font-medium text-gray-500 mt-8'>
                   Bạn chưa có tài khoản?
                   <span
                     onClick={() => setIsSignin(false)}
-                    className='cursor-pointer p-2 inline-block font-medium text-blue-600 hover:underline'>
+                    className='cursor-pointer p-2 inline-block text-blue-600 hover:underline'>
                     Đăng ký
                   </span>
                 </p>
@@ -145,7 +152,7 @@ const AuthPage = () => {
         <div className='relative bg-white rounded-lg shadow'>
           <div className='px-6 py-6 lg:px-8'>
             <h3 className='text-xl font-semibold text-gray-900 mb-4'>Tạo tài khoản mới</h3>
-            <form onSubmit={handelSignup}>
+            <form onSubmit={handleSignup}>
               <div className='relative z-0 w-full mb-6 group'>
                 <input
                   value={email}

@@ -24,7 +24,6 @@ const SearchPage = () => {
 
   useEffect(() => {
     queryUser(searchValue).then((data) => {
-      console.log(data);
       setSearchData(data);
     });
   }, [searchValue]);
@@ -76,7 +75,7 @@ const SearchPage = () => {
 
   const handleClickUser = (user) => {
     dispatch(setUser(user));
-    navigate('/person');
+    navigate(`/person/${user.userId}`);
   };
 
   return (

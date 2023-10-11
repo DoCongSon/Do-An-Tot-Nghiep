@@ -29,7 +29,7 @@ function App() {
         getUser(uid).then((data) => {
           if (data?.admin) {
             dispatch(setAdmin(true));
-            dispatch(clearUser());
+            console.log('🚀 ~ file: App.jsx:32 ~ setAdmin:', data?.admin);
           } else {
             dispatch(setAdmin(false));
             dispatch(setUser({ ...data, userId: uid }));

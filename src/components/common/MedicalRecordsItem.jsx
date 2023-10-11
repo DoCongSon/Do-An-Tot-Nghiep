@@ -2,18 +2,32 @@ import React from 'react';
 import IconButton from './IconButton';
 import { useSelector } from 'react-redux';
 
-const MedicalRecordsItem = ({ date, doctor, symptom, diagnostic, prescription }) => {
+const MedicalRecordsItem = ({
+  date,
+  doctor,
+  symptom,
+  diagnostic,
+  prescription,
+  onDelete,
+  onClick,
+}) => {
   const isAdmin = useSelector((state) => state.user.admin);
 
   return (
-    <div className='bg-white p-5 shadow-md rounded-md hover:border-2 hover:border-red-400 cursor-pointer'>
+    <div
+      onClick={onClick}
+      className='bg-white p-5 shadow-md rounded-md hover:border-2 hover:border-red-400 cursor-pointer'>
       <div className='flex items-center'>
         <div className='flex-1 flex'>
-          <p className='font-bold'>Ngày khám: {date}</p>
+          <p className='font-bold'>Thời điểm khám: {date}</p>
           <p className='font-bold ml-10'>Bác sĩ: {doctor}</p>
         </div>
         {isAdmin && (
           <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
             style='bg-red-200 hover:bg-red-300'
             icon={
               <svg

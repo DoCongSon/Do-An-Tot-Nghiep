@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { signout } from '../../apis/auth.api';
 import { setGlobalLoading } from '../../redux/features/globalLoadingSlice';
 
-const navitems = [
+const navitemsAdmin = [
   {
     name: 'Home',
     to: '/',
@@ -142,7 +142,7 @@ const Header = () => {
             id='mobile-menu-2'>
             <ul className='flex flex-col mt-4 font-medium md:flex-row md:space-x-8 md:mt-0'>
               {admin &&
-                navitems.map((item, index) => {
+                navitemsAdmin.map((item, index) => {
                   return (
                     <li key={index} className='flex items-center'>
                       <Link

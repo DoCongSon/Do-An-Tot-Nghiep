@@ -12,6 +12,9 @@ import { collection, onSnapshot, query } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { deleteUserAccount } from '../apis/auth.api';
 import Dialog from '../components/common/Dialog';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../redux/features/userSlice';
+import { useNavigate } from 'react-router-dom';
 
 const ManagePage = () => {
   const [users, setUsers] = useState([]);
@@ -27,6 +30,8 @@ const ManagePage = () => {
   const [isDialogShow, setIsDialogShow] = useState(false);
   const [userNameToDelete, setUserNameDelete] = useState('');
   const [uidToDelete, setUidToDelete] = useState('');
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const q = query(collection(db, 'users'));
@@ -85,7 +90,10 @@ const ManagePage = () => {
     setIsModalVisible(false);
   };
 
-  const handleEditUser = async () => {};
+  const handleEditUser = (user) => {
+    dispatch(setUser(user));
+    navigate(`/person/${user.userId}`);
+  };
 
   const handleDeleteUser = async (userId) => {
     setUidToDelete(userId);
@@ -136,7 +144,7 @@ const ManagePage = () => {
             key={user.userId}
             {...user}
             onDelete={() => handleDeleteUser(user.userId)}
-            onEdit={() => handleEditUser(user.userId)}
+            onEdit={() => handleEditUser(user)}
           />
         ))}
       </div>
@@ -249,7 +257,8 @@ const ManagePage = () => {
               <input
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
-                type='tel'
+                type='number'
+                maxLength={10}
                 name='floating_tel'
                 id='floating_tel'
                 className='block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer'

@@ -76,30 +76,6 @@ const getAllUser = async () => {
   } catch (error) {}
 };
 
-const snapshotUsers = async (callback) => {
-  try {
-    const q = query(collection(db, 'users'));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const users = [];
-      querySnapshot.forEach((doc) => {
-        if (doc.data().name) users.push({ ...doc.data(), userId: doc.id });
-      });
-      console.log('🚀 ~ file: user.api.js:88 ~ users:', users);
-      callback(users);
-    });
-    return unsubscribe;
-  } catch (error) {}
-};
-
-const deleteUserData = async (userId) => {
-  const userRef = doc(db, 'users', userId);
-  try {
-    await deleteDoc(userRef);
-  } catch (e) {
-    console.error('Error delete user: ', e);
-  }
-};
-
 const queryUser = async (name) => {
   if (name === '') return [];
   try {
@@ -116,4 +92,4 @@ const queryUser = async (name) => {
   } catch (error) {}
 };
 
-export { addUser, updateUser, getUser, getAllUser, queryUser, deleteUserData, snapshotUsers };
+export { addUser, updateUser, getUser, getAllUser, queryUser };

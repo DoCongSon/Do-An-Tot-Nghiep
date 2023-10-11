@@ -3,11 +3,6 @@ import SearchPage from '../pages/SearchPage';
 import DetailPage from '../pages/DetailPage';
 import ManagePage from '../pages/ManagePage';
 
-export const routesGen = {
-  home: '/',
-  person: '/person',
-};
-
 const routesAdmin = [
   {
     index: true,
@@ -25,7 +20,7 @@ const routesAdmin = [
     state: 'Manage',
   },
   {
-    path: '/person',
+    path: '/person/:personId',
     element: <DetailPage />,
     state: 'person',
   },
