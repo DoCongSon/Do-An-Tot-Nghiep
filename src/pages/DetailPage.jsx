@@ -92,7 +92,7 @@ const DetailPage = () => {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     (async () => {
